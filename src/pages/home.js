@@ -3,7 +3,6 @@ import Chart from "chart.js/auto";
 import "../css/home.css";
 import { Chart as ChartJS } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
-import { saveAs } from "file-saver";
 
 function Home() {
   ChartJS.register(zoomPlugin);
