@@ -1,3 +1,56 @@
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #0f1214;
+  border-bottom: 3px solid #1b1f23;
+  color: #5594d2;
+}
+.navbar-logo{
+  margin-right: 70px;
+  width:100px
+}
+.navbar-title{
+  margin-left: 70px; 
+}
+
+.bnt-photo{
+  padding: 10px 20px;
+  border: 2px solid #5594d2;
+  color:white;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  gap:5px;
+}
+.toolbar{
+  display: flex;
+  justify-content: center;
+}
+.toolbar-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background-color: #11171d;
+  padding: 10px 30px;
+  border-Radius: 10px;
+}
+
+.main-container{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #11171d;
+  width: 100%;
+  border-radius: 10px;
+  color: white;
+}
+.brain-moch{
+  width: 450px;
+}
 .chart-container {
   width: 100%;
   height: 100vh;
@@ -6,14 +59,4 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  background-color: #329ebb;
-  color: white;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
 }

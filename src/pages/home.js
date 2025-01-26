@@ -1,16 +1,32 @@
-import { React, useEffect, useState, useRef } from "react";
+import { React, useEffect, useState, useRef, Suspense } from "react";
+
+import { useQuery } from "react-query";
 import Chart from "chart.js/auto";
 import "../css/home.css";
 import { Chart as ChartJS } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
+import { Slider } from "@mui/material";
+import { Line } from 'react-chartjs-2';
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import Brain from '../brain/Brain'
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+
+// import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
 
 function Home() {
   ChartJS.register(zoomPlugin);
-  const [isLoading, setLoading] = useState(true);
+  const [range, setRange] = useState([0, 70000]);
+  const [chartData, setChartData] = useState(null);
+  const [isLoading, setLoading] = useState(false);
   const canvasRef = useRef(null);
-
+  const [channelSelected, setChannel] = useState(1);
+  const [channelChanged, setChanged] = useState(false)
   const [xMin, setXMin] = useState(0);
   const [xMax, setXMax] = useState(70000);
+  
   const [myChart, setMyChart] = useState(null);
 
   const updateChart = () => {
@@ -24,150 +40,49 @@ function Home() {
     }
   };
 
-  useEffect(() => {
-    fetch("/dataset3.json")
-      .then((response) => response.json())
-      .then((jsonData) => {
-        const labels = jsonData.Time;
-        const channel1 = jsonData.Ch1;
-        const channel2 = jsonData.Ch2;
-        const channel3 = jsonData.Ch3;
-        const channel4 = jsonData.Ch4;
-        const channel5 = jsonData.Ch5;
-        const channel6 = jsonData.Ch6;
-        const channel7 = jsonData.Ch7;
-        const channel8 = jsonData.Ch8;
+  const getValues = async () => {
+		const res = await fetch('http://localhost:1000/channels/'+ (channelSelected+1));
+    const data = await res.json();
+    return data;
+	};
+  const getTime = async () => {
+		const res = await fetch('http://localhost:1000/time');
+		const data = await res.json();
+    return data;
+	};
+  const loadChartData = async () => {
+    const values = await getValues();
+    const times = await getTime();
 
-        if (canvasRef.current) {
-          const chart = new Chart(canvasRef.current, {
-            type: "line",
-            data: {
-              labels: labels,
-              datasets: [
-                {
-                  label: "Channel 1",
-                  data: channel1,
-                  borderColor: "rgba(255, 99, 132, 1)",
-                  backgroundColor: "rgba(255, 99, 132, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 2",
-                  data: channel2,
-                  borderColor: "rgba(54, 162, 235, 1)",
-                  backgroundColor: "rgba(54, 162, 235, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 3",
-                  data: channel3,
-                  borderColor: "rgba(75, 192, 192, 1)",
-                  backgroundColor: "rgba(75, 192, 192, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 4",
-                  data: channel4,
-                  borderColor: "rgba(153, 102, 255, 1)",
-                  backgroundColor: "rgba(153, 102, 255, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 5",
-                  data: channel5,
-                  borderColor: "rgba(255, 159, 64, 1)",
-                  backgroundColor: "rgba(255, 159, 64, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 6",
-                  data: channel6,
-                  borderColor: "rgba(255, 99, 132, 1)",
-                  backgroundColor: "rgba(255, 99, 132, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 7",
-                  data: channel7,
-                  borderColor: "rgba(54, 162, 235, 1)",
-                  backgroundColor: "rgba(54, 162, 235, 0.2)",
-                  fill: false,
-                },
-                {
-                  label: "Channel 8",
-                  data: channel8,
-                  borderColor: "rgba(75, 192, 192, 1)",
-                  backgroundColor: "rgba(75, 192, 192, 0.2)",
-                  fill: false,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              animation: false,
-              scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: "Time",
-                  },
-                  min: xMin,
-                  max: xMax,
-                  grid: {
-                    display: true,
-                    color: "#e0e0e0",
-                    borderColor: "#ccc",
-                    borderWidth: 1,
-                  },
-                },
-                y: {
-                  title: {
-                    display: true,
-                    text: "Value",
-                  },
-                  grid: {
-                    display: true,
-                    color: "#e0e0e0",
-                    borderColor: "#ccc",
-                    borderWidth: 1,
-                  },
-                },
-              },
-              plugins: {
-                zoom: {
-                  wheel: {
-                    enabled: true, // Ativa o zoom com o scroll do mouse
-                    speed: 0.1,
-                    sensitivity: 3,
-                  },
-                  drag: {
-                    enabled: true, // Ativa o zoom com o drag (arraste do mouse)
-                    speed: 10,
-                  },
-                  pinch: {
-                    enabled: true, // Ativa o zoom com o gesto de pinçar (mobile)
-                    sensitivity: 3,
-                  },
-                },
-              },
-            },
-            plugins: [zoomPlugin],
-          });
+    setChartData({
+      labels: times,
+      datasets: [
+        {
+          label: 'Meu Gráfico',
+          data: values,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        },
+      ],
+    });
+  };
+  const options = {
+    responsive: true,
+     animation: {
+       duration: 300,  
+     },
+     plugins: {
+      legend: {
+        display: false,  // Remove a legenda
+      },
+    },
+  };
 
-          setMyChart(chart);
-
-          canvasRef.current.addEventListener("wheel", (event) => {
-            if (event.ctrlKey) {
-              event.preventDefault();
-            }
-          });
-        }
-
-        setLoading(false);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, [xMin, xMax]);
-
+  // useEffect(() => {
+  //   loadChartData();
+  //   setChanged(false)
+  //   }, [channelChanged]);
+   
   function saveCanvas() {
     if (myChart) {
       const image = myChart.toBase64Image("image/jpeg", 1.0);
@@ -179,53 +94,78 @@ function Home() {
       console.error("Chart instance is not available.");
     }
   }
-
+  const handleChange = (event, newValue) => {
+    setRange(newValue);
+  };
+  const handleChannel = (event,newChannel) => {
+    setChanged(true)
+    setChannel(newChannel)
+  }
+  loadChartData()
   return (
     <div>
       {isLoading ? (
         <div>Loading...</div>
       ) : (
         <div>
-          <div className="navbar">
-            <h1 style={{ marginLeft: "70px" }}>Sistema Eeg</h1>
-            <img
-              style={{ marginRight: "70px" }}
-              width="70px"
-              src="/logo.jpeg"
-            ></img>
-          </div>
+            <nav className="navbar">
+              <div style={{display:"flex", justifyContent: "center", alignItems: "center", gap: "30px"}}>
+                <h1 className="navbar-title">EEG Graphic Viewer</h1>
+                <a className="bnt-photo">Upar novo arquivo <img style={{width: "20px"}}src={process.env.PUBLIC_URL + '/upload.png'}></img></a>
+                <a className="bnt-photo">Buscar registros <img style={{width: "20px"}}src={process.env.PUBLIC_URL + '/search.png'}></img></a>
+              </div>
+             
+              <img className="navbar-logo" src={process.env.PUBLIC_URL + '/logo2.png'} alt="Logo" />
+            </nav>
+        
+          <menu className="toolbar">
+          <div className="toolbar-container">
+            <div style={{width: "300px"}}>
+              <Slider
+                  getAriaLabel={() => 'EEG Range'}
+                  value={range}
+                  onChange={handleChange}
+                  valueLabelDisplay="auto"
+                  min={0}
+                  max={70000}
+                />
+            </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <label>
-              Min X:
-              <input
-                type="text"
-                value={xMin}
-                onChange={(e) => setXMin(Number(e.target.value))}
-              />
-            </label>
-            <label>
-              Max X:
-              <input
-                type="text"
-                value={xMax}
-                onChange={(e) => setXMax(Number(e.target.value))}
-              />
-            </label>
-
-            <button onClick={updateChart}>Atualizar Gráfico</button>
-            <button onClick={(e) => saveCanvas()}> Tirar foto</button>
-          </div>
-
-          <div style={{ marginTop: "20px" }}>
-            <canvas ref={canvasRef} id="myChart"></canvas>
+            <a className="bnt-photo">Tirar Foto <img style={{width: "20px"}}src={process.env.PUBLIC_URL + '/photo-camera.png'}></img></a>
+         
+          </div>  
+          </menu> 
+          <div style={{display:"flex", margin: "0 30px", gap: "15px"}}>
+            <div style={{display:"flex", justifyContent:"center", flex:2}}>
+              <main className="main-container">
+              <Tabs value={channelSelected} onChange={handleChannel} centered sx={{'& .MuiTab-root': {color: 'white'}, '& .Mui-selected': {color: 'primary.main'}}}>
+                <Tab label="Canal 1" />
+                <Tab label="Canal 2" />
+                <Tab label="Canal 3" />
+                <Tab label="Canal 4" />
+                <Tab label="Canal 5" />
+                <Tab label="Canal 6" />
+                <Tab label="Canal 7" />
+                <Tab label="Canal 8" />
+              </Tabs>
+                {chartData ? (
+                    <div style={{width: "100%", margin: "0 20px"}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    
+                  ) : (
+                    <p>Carregando gráfico...</p>
+                  )}
+              </main>
+            </div>
+            <div className="main-container" style={{flex:1}}>
+             <img className="brain-moch" src={process.env.PUBLIC_URL + '/brain-moch.png'}></img>
+              {/* <Canvas>
+                <Suspense fallback={null}>
+                  <Brain/>
+                </Suspense>
+              </Canvas> */}
+            </div>
           </div>
         </div>
       )}
