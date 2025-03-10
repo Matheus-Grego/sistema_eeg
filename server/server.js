@@ -1,57 +1,111 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-var cors = require('cors')
+var cors = require('cors');
+const multer = require('multer');
+const csv = require("csv-parser");
+const upload = multer({dest: 'uploads/'})
 
 const app = express();
 
 let channels = {};
-const filePath = path.join(__dirname, "dataset3.json");
+//const filePath = path.join(__dirname, "dataset3.json");
+var filePath = path.join(__dirname, "dataset7.csv");
 
 app.use(cors())
 
+app.post("/upload", (req, res) => {
+  
+  res.json("success");
+})
+
+
+
+function safeParseArray(data, columnName) {
+  if (!data || data.trim() === "") {
+    console.warn(`Aviso: Coluna "${columnName}" está vazia. Definindo como array vazio.`);
+    return []; // Retorna um array vazio se o valor for undefined ou string vazia
+  }
+
+  try {
+    return JSON.parse(data);
+  } catch (err) {
+    console.error(`Erro ao converter JSON na coluna "${columnName}": ${err.message}`);
+    return []; // Retorna um array vazio em caso de erro
+  }
+}
+
+
 async function loadData() {
   try {
-    const data = await fs.promises.readFile(filePath, { encoding: "utf-8" });
-    const jsonData = JSON.parse(data); // Parse do JSON completo
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (row) => {
+        try {
+          channels.labels = safeParseArray(row.Time, "Time");
+          channels.channel1 = safeParseArray(row.Ch1, "Ch1");
+          channels.channel2 = safeParseArray(row.Ch2, "Ch2");
+          channels.channel3 = safeParseArray(row.Ch3, "Ch3");
+          channels.channel4 = safeParseArray(row.Ch4, "Ch4");
+          channels.channel5 = safeParseArray(row.Ch5, "Ch5");
+          channels.channel6 = safeParseArray(row.Ch6, "Ch6");
+          channels.channel7 = safeParseArray(row.Ch7, "Ch7");
+          channels.channel8 = safeParseArray(row.Ch8, "Ch8");
+        } catch (err) {
+          console.error("Erro ao processar linha:", err.message);
+        }
+      })
+      .on("end", () => {
+        console.log("Dados carregados com sucesso!");
+      })
+      .on("error", (error) => {
+        console.error("Erro ao carregar os dados:", error);
+      });
+    // const data = await fs.promises.readFile(filePath, { encoding: "utf-8" });
+    // const jsonData = JSON.parse(data); // Parse do JSON completo
 
-    channels.labels = jsonData.Time.slice(0, 1500)|| [];
-    channels.channel1 = jsonData.Ch1.slice(0, 1500) || [];
-    channels.channel2 = jsonData.Ch2.slice(0, 1500) || [];
-    channels.channel3 = jsonData.Ch3.slice(0, 1500) || [];
-    channels.channel4 = jsonData.Ch4.slice(0, 1500) || [];
-    channels.channel5 = jsonData.Ch5.slice(0, 1500) || [];
-    channels.channel6 = jsonData.Ch6.slice(0, 1500) || [];
-    channels.channel7 = jsonData.Ch7.slice(0, 1500) || [];
-    channels.channel8 = jsonData.Ch8.slice(0, 1500) || [];
+    // channels.labels = jsonData.Time|| [];
+    // channels.channel1 = jsonData.Ch1 || [];
+    // channels.channel2 = jsonData.Ch2 || [];
+    // channels.channel3 = jsonData.Ch3 || [];
+    // channels.channel4 = jsonData.Ch4 || [];
+    // channels.channel5 = jsonData.Ch5 || [];
+    // channels.channel6 = jsonData.Ch6 || [];
+    // channels.channel7 = jsonData.Ch7 || [];
+    // channels.channel8 = jsonData.Ch8 || [];
 
-    console.log("Dados carregados (primeiros 10 itens):");
+    // console.log("Dados carregados (primeiros 10 itens):");
   } catch (err) {
     console.error("Erro ao ler o arquivo:", err);
   }
 }
 
 loadData().then(() => {
-    app.get("/channels/:channelId", (req, res) => {
-      const { channelId } = req.params;
-  
+    app.get("/teste", (req, res) => {
+      const channel = channels.labels
+      res.json(channel);
+    })
+    app.get("/channels/:channelId/:min/:max", (req, res) => {
+      const { channelId ,min, max} = req.params;
+
       if (Object.keys(channels).length === 0) {
         return res.status(500).send("Dados ainda não carregados");
       }
     
       const channelKey = `channel${channelId}`; 
-      const channel = channels[channelKey];
+      const channel = channels[channelKey]?.slice(Number(min), Number(max));
 
       if (!channel) {
         return res.status(404).send(`Channel '${channelId}' não encontrado.`);
       }
       res.json(channel);
     })
-    app.get("/time", (req,res) => {
+    app.get("/time/:min/:max", (req,res) => {
+      const {min, max} = req.params;
       if (Object.keys(channels).length === 0) {
         return res.status(500).send("Dados ainda não carregados");
       }
-      const time = channels.labels
+      const time = channels.labels?.slice(Number(min),Number(max))
       res.json(time)
     });
   

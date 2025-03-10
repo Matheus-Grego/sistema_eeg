@@ -25,6 +25,10 @@
   align-items: center;
   gap:5px;
 }
+.bnt-photo:hover{
+  background-color: #5594d233;
+  border-color: #90caf9;
+}
 .toolbar{
   display: flex;
   justify-content: center;
@@ -42,6 +46,7 @@
 .main-container{
   display: flex;
   justify-content: center;
+
   flex-direction: column;
   background-color: #11171d;
   width: 100%;
@@ -50,7 +55,33 @@
 }
 .brain-moch{
   width: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+.my-style {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  align-items: center;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  width: 50vw;
+  height: 70vh;
+  background-color: #11171d;
+  border: 2px solid #000;
+  color: #5594d2;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  padding-top: 16px;  
+  padding-left: 32px; 
+  padding-right: 32px; 
+  padding-bottom: 24px; 
+  border-radius: 20px;
+  border: 2px solid #5594d2;
+}
+
 .chart-container {
   width: 100%;
   height: 100vh;
