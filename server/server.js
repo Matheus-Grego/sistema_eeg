@@ -4,21 +4,66 @@ const path = require("path");
 var cors = require('cors');
 const multer = require('multer');
 const csv = require("csv-parser");
-const upload = multer({dest: 'uploads/'})
+const { exec } = require('node:child_process');
 
 const app = express();
-
+const command = 'julia main.jl'
 let channels = {};
-//const filePath = path.join(__dirname, "dataset3.json");
-var filePath = path.join(__dirname, "dataset7.csv");
+var filePath = path.join(__dirname, 'uploads', 'saida3.csv');
+
+
 
 app.use(cors())
 
-app.post("/upload", (req, res) => {
-  
-  res.json("success");
-})
+const uploadDirectory = path.join(__dirname, 'raw');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDirectory);
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'teste.csv');
+  }
+});
 
+const upload = multer({ storage: storage });
+
+
+
+app.post("/upload", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Nenhum arquivo enviado." });
+  }
+
+  const command = `julia main.jl "C:\\Users\\Labsense\\sistema_eeg_backup\\sistema_eeg\\server\\raw\\teste.csv"`;
+
+
+  exec(command, {
+    cwd: '/Users/Labsense/Sinapsense'
+  }, (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Erro ao processar o arquivo." });
+    }
+    console.log(stdout);
+
+    // Caminho do arquivo gerado (saida3.csv)
+    const filePath = path.join('/Users/Labsense/Sinapsense', 'saida2.csv');
+    const uploadPath = path.join(__dirname, 'uploads', 'saida3.csv'); // Salvar em 'uploads/saida3.csv'
+
+    fs.rename(filePath, uploadPath, (err) => {
+      if (err) {s
+        console.error(err);
+        return res.status(500).json({ error: "Erro ao mover o arquivo." });
+      }
+
+      // Retorna a resposta com o caminho do arquivo movido
+      res.json({ message: "Arquivo processado com sucesso", filePath: uploadPath });
+    });
+  });
+});
+
+
+///////
 
 
 function safeParseArray(data, columnName) {
@@ -34,7 +79,6 @@ function safeParseArray(data, columnName) {
     return []; // Retorna um array vazio em caso de erro
   }
 }
-
 
 async function loadData() {
   try {
@@ -61,20 +105,7 @@ async function loadData() {
       .on("error", (error) => {
         console.error("Erro ao carregar os dados:", error);
       });
-    // const data = await fs.promises.readFile(filePath, { encoding: "utf-8" });
-    // const jsonData = JSON.parse(data); // Parse do JSON completo
-
-    // channels.labels = jsonData.Time|| [];
-    // channels.channel1 = jsonData.Ch1 || [];
-    // channels.channel2 = jsonData.Ch2 || [];
-    // channels.channel3 = jsonData.Ch3 || [];
-    // channels.channel4 = jsonData.Ch4 || [];
-    // channels.channel5 = jsonData.Ch5 || [];
-    // channels.channel6 = jsonData.Ch6 || [];
-    // channels.channel7 = jsonData.Ch7 || [];
-    // channels.channel8 = jsonData.Ch8 || [];
-
-    // console.log("Dados carregados (primeiros 10 itens):");
+   
   } catch (err) {
     console.error("Erro ao ler o arquivo:", err);
   }
@@ -115,6 +146,6 @@ loadData().then(() => {
   });
 
 
-app.listen(1000, () => {
-  console.log("Servidor rodando na porta 1000");
+app.listen(877, () => {
+  console.log("Servidor rodando na porta 2000");
 });
