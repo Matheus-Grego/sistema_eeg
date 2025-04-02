@@ -7,7 +7,7 @@ const csv = require("csv-parser");
 const { exec } = require('node:child_process');
 
 const app = express();
-const command = 'julia main.jl'
+
 let channels = {};
 var filePath = path.join(__dirname, 'uploads', 'saida3.csv');
 
@@ -34,30 +34,32 @@ app.post("/upload", upload.single("file"), (req, res) => {
     return res.status(400).json({ error: "Nenhum arquivo enviado." });
   }
 
-  const command = `julia main.jl "C:\\Users\\Labsense\\sistema_eeg_backup\\sistema_eeg\\server\\raw\\teste.csv"`;
+  const command = `julia main.jl "C:\\Users\\User\\sistema_eeg\\server\\raw\\teste.csv"`;
 
 
   exec(command, {
-    cwd: '/Users/Labsense/Sinapsense'
+    cwd: '/Users/User/Sinapsense'
   }, (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: "Erro ao processar o arquivo." });
     }
+    console.log(123)
     console.log(stdout);
 
     // Caminho do arquivo gerado (saida3.csv)
-    const filePath = path.join('/Users/Labsense/Sinapsense', 'saida2.csv');
+    const filePath = path.join('/Users/User/Sinapsense', 'saida2.csv');
     const uploadPath = path.join(__dirname, 'uploads', 'saida3.csv'); // Salvar em 'uploads/saida3.csv'
 
     fs.rename(filePath, uploadPath, (err) => {
-      if (err) {s
+      if (err) {
         console.error(err);
         return res.status(500).json({ error: "Erro ao mover o arquivo." });
       }
 
       // Retorna a resposta com o caminho do arquivo movido
       res.json({ message: "Arquivo processado com sucesso", filePath: uploadPath });
+      loadData()
     });
   });
 });
