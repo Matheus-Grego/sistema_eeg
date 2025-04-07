@@ -15,6 +15,8 @@ import { pink } from '@mui/material/colors';
 import { styled } from "@mui/material/styles";
 import Modal from '@mui/material/Modal';
 import { FileUploader } from "react-drag-drop-files";
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 // import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -26,6 +28,7 @@ function Home() {
   const [range, setRange] = useState([0,1500]);
   const [chartData, setChartData] = useState(null);
   const [isLoading, setLoading] = useState(false);
+  const [LoadingBar, setLoadingBar] = useState(false);
   const canvasRef = useRef(null);
   const [channelSelected, setChannel] = useState(0);
   const [xMin, setXMin] = useState(0);
@@ -41,6 +44,7 @@ function Home() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => {
     setOpen(true);
+   
   };
   const handleClose = () => {
     setOpen(false);
@@ -53,12 +57,12 @@ function Home() {
   const getValues = async () => {
    
     if (range !== [xMin,xMax]){
-      var res = await fetch('http://localhost:877/channels/'+ (channelSelected+1) + "/" + range[0] + "/" + range[1]);
+      var res = await fetch('http://200.236.3.148:877/channels/'+ (channelSelected+1) + "/" + range[0] + "/" + range[1]);
       const data = await res.json();
       return data;
     }
     else{
-	   var res = await fetch('http://localhost:877/channels/'+ (channelSelected+1) + "/" + xMin + "/" + xMax);
+	   var res = await fetch('http://200.236.3.148:877/channels/'+ (channelSelected+1) + "/" + xMin + "/" + xMax);
      const data = await res.json();
     return data;}
     
@@ -67,12 +71,12 @@ function Home() {
 
   const getTime = async () => {
     if (range !== [xMin,xMax]){
-      let res = await fetch('http://localhost:877/time/' + Math.floor(Number(range[0])/4) + "/" + Math.floor(Number(range[1])/4));
+      let res = await fetch('http://200.236.3.148:877/time/' + Math.floor(Number(range[0])/4) + "/" + Math.floor(Number(range[1])/4));
       const data = await res.json();
       return data
     }
     else{
-		let res = await fetch('http://localhost:877/time/' + Math.floor(Number(xMin)/4) + "/" + Math.floor(Number(xMax)/4));
+		let res = await fetch('http://200.236.3.148:877/time/' + Math.floor(Number(xMin)/4) + "/" + Math.floor(Number(xMax)/4));
 		const data = await res.json();
     return data}
 	};
@@ -174,14 +178,23 @@ function Home() {
   const handleFilePOST = (file) => {
      const formData = new FormData();
      formData.append("file", file);
+     setLoadingBar(true)
   
-     fetch("http://localhost:877/upload", {
+     fetch("http://200.236.3.148:877/upload", {
        method: "POST",
        body: formData
      })
-     .then(response => response.json())
+     .then((response) => {
+          
+          // response.json()
+          window.location.reload();
+
+    })
      .then(data => console.log("Arquivo enviado:", data))
      .catch(error => console.error("Erro ao enviar:", error));
+
+     
+
   };
   
 
@@ -199,6 +212,7 @@ function Home() {
                 <h1 className="navbar-title">EEG Graphic Viewer</h1>
                 <a onClick={() => handleOpen()} className="bnt-photo">Upar novo arquivo <img style={{width: "20px"}}src={process.env.PUBLIC_URL + '/upload.png'}></img></a>
                 <a className="bnt-photo">Buscar registros <img style={{width: "20px"}}src={process.env.PUBLIC_URL + '/search.png'}></img></a>
+                
               </div>
              
               <img className="navbar-logo" src={process.env.PUBLIC_URL + '/logo2.png'} alt="Logo" />
@@ -220,7 +234,15 @@ function Home() {
                       types={["CSV"]} 
                     />
                   </p>
-              
+                  {LoadingBar ? (
+                      <div style={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <Stack direction="row" spacing={2}>
+                          <CircularProgress />
+                        </Stack>
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
                 </div>
               </Modal>
         
