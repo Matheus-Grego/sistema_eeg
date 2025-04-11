@@ -17,6 +17,7 @@ import Modal from '@mui/material/Modal';
 import { FileUploader } from "react-drag-drop-files";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import Multichart from "./multichart";
 
 
 // import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -80,10 +81,9 @@ function Home() {
 		const data = await res.json();
     return data}
 	};
-  const loadChartData = async () => {
+  const loadChartDataaaa = async () => {
     const values = await getValues();
     const times = await getTime();
-
     setChartData({
       labels: times,
       datasets: [
@@ -102,6 +102,7 @@ function Home() {
   };
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
      animation: {
        duration: 600,  
      },
@@ -110,6 +111,11 @@ function Home() {
         display: false,  // Remove a legenda
       },
     },
+    scales:{
+      x: {
+          display: false ////this will remove all the x-axis grid lines
+      }
+  }
     // scales: {
     //   y: {
     //     min: -1300,  // Define o mínimo do eixo Y
@@ -198,9 +204,7 @@ function Home() {
   };
   
 
-  useEffect(() => {
-    loadChartData();
-  }, [channelSelected,range]);
+ 
   return (
     <div>
       {isLoading ? (
@@ -292,14 +296,35 @@ function Home() {
                 <Tab label="Canal 7" />
                 <Tab label="Canal 8" />
               </Tabs>
-                {chartData ? (
-                    <div style={{width: "100%", margin: "0 20px"}}>
+                
+                    <Multichart range={range}/>
+                    {/* <div className="multiline" style={{width: "100%",margin: ""}}>
                       <Line data={chartData} options={options} id="myChart" />
                     </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div>
+                    <div className="multiline" style={{width: "100%", margin: ""}}>
+                      <Line data={chartData} options={options} id="myChart" />
+                    </div> */}
+               
                     
-                  ) : (
-                    <p>Carregando gráfico...</p>
-                  )}
+                 
               </main>
             </div>
 
