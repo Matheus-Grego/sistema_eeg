@@ -11,8 +11,6 @@ const app = express();
 let channels = {};
 var filePath = path.join(__dirname, 'uploads', 'saida3.csv');
 
-
-
 app.use(cors())
 
 const uploadDirectory = path.join(__dirname, 'raw');
@@ -36,7 +34,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
   const command = `julia main.jl "C:\\Users\\User\\sistema_eeg\\server\\raw\\teste.csv"`;
 
-
   exec(command, {
     cwd: '/Users/User/Sinapsense'
   }, (err, stdout, stderr) => {
@@ -46,8 +43,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
     }
     console.log(123)
     console.log(stdout);
-
-    // Caminho do arquivo gerado (saida3.csv)
+    
     const filePath = path.join('/Users/User/Sinapsense', 'saida2.csv');
     const uploadPath = path.join(__dirname, 'uploads', 'saida3.csv'); // Salvar em 'uploads/saida3.csv'
 
@@ -57,28 +53,23 @@ app.post("/upload", upload.single("file"), (req, res) => {
         return res.status(500).json({ error: "Erro ao mover o arquivo." });
       }
 
-      // Retorna a resposta com o caminho do arquivo movido
       res.json({ message: "Arquivo processado com sucesso", filePath: uploadPath });
       loadData()
     });
   });
 });
 
-
-///////
-
-
 function safeParseArray(data, columnName) {
   if (!data || data.trim() === "") {
     console.warn(`Aviso: Coluna "${columnName}" está vazia. Definindo como array vazio.`);
-    return []; // Retorna um array vazio se o valor for undefined ou string vazia
+    return []; 
   }
 
   try {
     return JSON.parse(data);
   } catch (err) {
     console.error(`Erro ao converter JSON na coluna "${columnName}": ${err.message}`);
-    return []; // Retorna um array vazio em caso de erro
+    return [];
   }
 }
 
@@ -149,5 +140,5 @@ loadData().then(() => {
 
 
 app.listen(877, () => {
-  console.log("Servidor rodando na porta 2000");
+  console.log("Servidor rodando na porta 877");
 });
