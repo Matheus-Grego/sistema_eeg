@@ -19,12 +19,12 @@ const getValues = async () => {
 
     
     if (range !== [xMin,xMax]){
-      var res = await fetch('http://localhost:877/channels/'+ (channelSelected+1) + "/" + range[0] + "/" + range[1]);
+      var res = await fetch('http://200.236.3.148:877/channels/'+ (channelSelected+1) + "/" + range[0] + "/" + range[1]);
       const data = await res.json();
       return data;
     }
     else{
-	   var res = await fetch('http://localhost:877/channels/'+ (channelSelected+1) + "/" + xMin + "/" + xMax);
+	   var res = await fetch('http://200.236.3.148:877/channels/'+ (channelSelected+1) + "/" + xMin + "/" + xMax);
      const data = await res.json();
     return data;}
     
@@ -33,12 +33,12 @@ const getValues = async () => {
 
   const getTime = async () => {
     if (range !== [xMin,xMax]){
-      let res = await fetch('http://localhost:877/time/' + Math.floor(Number(range[0])/4) + "/" + Math.floor(Number(range[1])/4));
+      let res = await fetch('http://200.236.3.148:877/time/' + Math.floor(Number(range[0])/4) + "/" + Math.floor(Number(range[1])/4));
       const data = await res.json();
       return data
     }
     else{
-		let res = await fetch('http://localhost:877/time/' + Math.floor(Number(xMin)/4) + "/" + Math.floor(Number(xMax)/4));
+		let res = await fetch('http://200.236.3.148:877/time/' + Math.floor(Number(xMin)/4) + "/" + Math.floor(Number(xMax)/4));
 		const data = await res.json();
     return data}
 	};
